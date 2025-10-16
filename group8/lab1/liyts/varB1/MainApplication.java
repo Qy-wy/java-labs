@@ -5,6 +5,14 @@ public class MainApplication {
     public static void main(String[] args) throws Exception {
         Food[] breakfast = new Food[20];
         int itemsSoFar = 0;
+        boolean showCalories = false;
+
+        for (String arg : args) {
+            if (arg.equals("-calories")) {
+                showCalories = true;
+                continue;
+            }
+        }
 
         for (String arg : args) {
             String[] parts = arg.split("/");
@@ -43,13 +51,15 @@ public class MainApplication {
         System.out.println("Чая цвета зеленый: " + teaCount2);
         System.out.println("Сыра: " + cheeseCount);
 
-        int totalCalories = 0;
-        for (Food item : breakfast) {
-            if (item instanceof Nutritious) {
-                totalCalories += ((Nutritious) item).calculateCalories();
+        if(showCalories) {
+            int totalCalories = 0;
+            for (Food item : breakfast) {
+                if (item instanceof Nutritious) {
+                    totalCalories += ((Nutritious) item).calculateCalories();
+                }
             }
+            System.out.println("Общая калорийность завтрака: " + totalCalories + " ккал");
         }
-        System.out.println("Общая калорийность завтрака: " + totalCalories + " ккал");
 
         System.out.println("Всего хорошего!");
     }
