@@ -1,11 +1,21 @@
 package lab1.liyts.varB1;
 
+import java.util.Arrays;
+
 public class MainApplication {
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         Food[] breakfast = new Food[20];
         int itemsSoFar = 0;
         boolean showCalories = false;
+        boolean sortBreakfast = false;
+
+        for (String arg : args) {
+            if (arg.equals("-sort")) {
+                sortBreakfast = true;
+                continue;
+            }
+        }
 
         for (String arg : args) {
             if (arg.equals("-calories")) {
@@ -24,6 +34,10 @@ public class MainApplication {
                 breakfast[itemsSoFar] = new Tea(parts[1]);
             }
             itemsSoFar++;
+        }
+
+        if (sortBreakfast) {
+            Arrays.sort(breakfast, new FoodComparator());
         }
 
         for (Food item : breakfast) {
