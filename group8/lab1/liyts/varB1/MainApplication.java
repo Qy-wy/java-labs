@@ -12,6 +12,8 @@ public class MainApplication {
                 breakfast[itemsSoFar] = new Cheese();
             } else if (parts[0].equals("Apple")) {
                 breakfast[itemsSoFar] = new Apple(parts[1]);
+            } else if (parts[0].equals("Tea")) {
+                breakfast[itemsSoFar] = new Tea(parts[1]);
             }
             itemsSoFar++;
         }
