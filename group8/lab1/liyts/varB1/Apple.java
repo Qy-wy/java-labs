@@ -1,6 +1,6 @@
 package lab1.liyts.varB1;
 
-public class Apple extends Food {
+public class Apple extends Food implements Nutritious {
     private String size;
 
     public Apple(String size) {
@@ -29,6 +29,12 @@ public class Apple extends Food {
 
     public String toString() {
         return super.toString() + " размера '" + size.toUpperCase() + "'";
+    }
+
+    public int calculateCalories() {
+        if (size.equalsIgnoreCase("большое")) return 100;
+        if (size.equalsIgnoreCase("маленькое")) return 60;
+        return 80;
     }
 }
 

@@ -1,6 +1,6 @@
 package lab1.liyts.varB1;
 
-public class Tea extends Food {
+public class Tea extends Food implements Nutritious {
     private String color;
 
     public Tea(String color) {
@@ -29,5 +29,11 @@ public class Tea extends Food {
 
     public String toString() {
         return super.toString() + " цвета '" + color.toUpperCase() + "'";
+    }
+
+    public int calculateCalories() {
+        if (color.equalsIgnoreCase("черный")) return 2;
+        if (color.equalsIgnoreCase("зеленый")) return 0;
+        return 1;
     }
 }

@@ -43,6 +43,14 @@ public class MainApplication {
         System.out.println("Чая цвета зеленый: " + teaCount2);
         System.out.println("Сыра: " + cheeseCount);
 
+        int totalCalories = 0;
+        for (Food item : breakfast) {
+            if (item instanceof Nutritious) {
+                totalCalories += ((Nutritious) item).calculateCalories();
+            }
+        }
+        System.out.println("Общая калорийность завтрака: " + totalCalories + " ккал");
+
         System.out.println("Всего хорошего!");
     }
 
