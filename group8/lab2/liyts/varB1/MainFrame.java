@@ -34,6 +34,9 @@ public class MainFrame extends JFrame {
     // Контейнер для отображения радио-кнопок
     private Box hboxFormulaType = Box.createHorizontalBox();
     private int formulaId = 1;
+
+    private double[] memory = new double[3];
+    private int activeMemoryIndex = 0;
     // Формула №1 для рассчѐта
     public Double calculate1(Double x, Double y, Double z) {
         if (z <= 0) throw new ArithmeticException("Некорректное значение Z для логарифма");
@@ -130,6 +133,10 @@ public class MainFrame extends JFrame {
                     JOptionPane.showMessageDialog(MainFrame.this,
                             "Ошибка в формате записи числа с плавающей точкой", "Ошибочный формат числа",
                             JOptionPane.WARNING_MESSAGE);
+                }catch (ArithmeticException ex) {
+                    JOptionPane.showMessageDialog(MainFrame.this,
+                            "Ошибка вычисления: " + ex.getMessage(), "Ошибка",
+                            JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
@@ -142,14 +149,74 @@ public class MainFrame extends JFrame {
                 textFieldResult.setText("0");
             }
         });
+
+        JButton buttonMC = new JButton("MC");
+        buttonMC.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                memory[activeMemoryIndex] = 0;
+            }
+        });
+
+        JButton buttonMPlus = new JButton("M+");
+        buttonMPlus.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                try {
+                    double x = Double.parseDouble(textFieldX.getText());
+                    double y = Double.parseDouble(textFieldY.getText());
+                    double z = Double.parseDouble(textFieldZ.getText());
+                    double result = (formulaId == 1) ? calculate1(x, y, z) : calculate2(x, y, z);
+                    memory[activeMemoryIndex] += result;
+                    textFieldResult.setText(String.format("%.4f", memory[activeMemoryIndex]));
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(MainFrame.this, "Ошибка: " + ex.getMessage(), "Ошибка", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
         Box hboxButtons = Box.createHorizontalBox();
         hboxButtons.add(Box.createHorizontalGlue());
         hboxButtons.add(buttonCalc);
         hboxButtons.add(Box.createHorizontalStrut(30));
         hboxButtons.add(buttonReset);
+        hboxButtons.add(Box.createHorizontalStrut(30));
+        hboxButtons.add(buttonMC);
+        hboxButtons.add(Box.createHorizontalStrut(30));
+        hboxButtons.add(buttonMPlus);
         hboxButtons.add(Box.createHorizontalGlue());
-        hboxButtons.setBorder(
-                BorderFactory.createLineBorder(Color.GREEN));
+        hboxButtons.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+
+        JRadioButton mem1 = new JRadioButton("Переменная 1");
+        JRadioButton mem2 = new JRadioButton("Переменная 2");
+        JRadioButton mem3 = new JRadioButton("Переменная 3");
+        ButtonGroup memGroup = new ButtonGroup();
+        memGroup.add(mem1); memGroup.add(mem2); memGroup.add(mem3);
+        mem1.setSelected(true);
+
+        mem1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                activeMemoryIndex = 0;
+            }
+        });
+        mem2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                activeMemoryIndex = 1;
+            }
+        });
+        mem3.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                activeMemoryIndex = 2;
+            }
+        });
+
+        Box hboxMemory = Box.createHorizontalBox();
+        hboxMemory.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
+        hboxMemory.add(Box.createHorizontalGlue());
+        hboxMemory.add(mem1);
+        hboxMemory.add(Box.createHorizontalStrut(20));
+        hboxMemory.add(mem2);
+        hboxMemory.add(Box.createHorizontalStrut(20));
+        hboxMemory.add(mem3);
+        hboxMemory.add(Box.createHorizontalGlue());
 // Связать области воедино в компоновке BoxLayout
         Box contentBox = Box.createVerticalBox();
         contentBox.add(Box.createVerticalGlue());
@@ -157,6 +224,7 @@ public class MainFrame extends JFrame {
         contentBox.add(hboxVariables);
         contentBox.add(hboxResult);
         contentBox.add(hboxButtons);
+        contentBox.add(hboxMemory);
         contentBox.add(Box.createVerticalGlue());
         getContentPane().add(contentBox, BorderLayout.CENTER);
     }
