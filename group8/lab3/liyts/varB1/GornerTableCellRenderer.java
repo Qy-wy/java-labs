@@ -44,6 +44,10 @@ public class GornerTableCellRenderer implements TableCellRenderer {
         String formattedDouble = formatter.format(value);
 // Установить текст надписи равным строковому представлению числа
         label.setText(formattedDouble);
+
+        double d = ((Number) value).doubleValue();
+        long intPart = (long) Math.floor(Math.abs(d));
+
         if (col==1 && needle!=null && needle.equals(formattedDouble)) {
 // Номер столбца = 1 (т.е. второй столбец) + иголка не null
 // (значит что-то ищем) +
@@ -52,7 +56,13 @@ public class GornerTableCellRenderer implements TableCellRenderer {
             panel.setBackground(Color.RED);
         } else {
 // Иначе - в обычный белый
-            panel.setBackground(Color.WHITE);
+            if (intPart % 2 == 0) {
+                // чётная целая часть
+                panel.setBackground(Color.WHITE);      // выбери любой цвет
+            } else {
+                // нечётная целая часть
+                panel.setBackground(Color.LIGHT_GRAY);    // и другой для нечётных
+            }
         }
         return panel;
     }
