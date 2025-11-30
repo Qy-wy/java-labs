@@ -29,6 +29,7 @@ public class MainFrame extends JFrame {
     // Пункты меню
     private JCheckBoxMenuItem showAxisMenuItem;
     private JCheckBoxMenuItem showMarkersMenuItem;
+    private JCheckBoxMenuItem showGridMenuItem;
     // Компонент-отображатель графика
     private GraphicsDisplay display = new GraphicsDisplay();
     // Флаг, указывающий на загруженность данных графика
@@ -92,6 +93,16 @@ public class MainFrame extends JFrame {
         graphicsMenu.add(showMarkersMenuItem);
 // Элемент по умолчанию включен (отмечен флажком)
         showMarkersMenuItem.setSelected(true);
+// Действие для "Показывать координатную сетку"
+        Action showGridAction = new AbstractAction("Показывать координатную сетку") {
+            public void actionPerformed(ActionEvent event) {
+                display.setShowGrid(showGridMenuItem.isSelected());
+            }
+        };
+        showGridMenuItem = new JCheckBoxMenuItem(showGridAction);
+        graphicsMenu.add(showGridMenuItem);
+// По умолчанию сетка выключена
+        showGridMenuItem.setSelected(false);
 // Зарегистрировать обработчик событий, связанных с меню "График"
         graphicsMenu.addMenuListener(new GraphicsMenuListener());
 // Установить GraphicsDisplay в цент граничной компоновки
@@ -159,6 +170,7 @@ Double.SIZE/8 байт;
 // Доступность или недоступность элементов меню "График" определяется загруженностью данных
             showAxisMenuItem.setEnabled(fileLoaded);
             showMarkersMenuItem.setEnabled(fileLoaded);
+            showGridMenuItem.setEnabled(fileLoaded);
         }
 
         // Обработчик, вызываемый после того, как меню исчезло с экрана

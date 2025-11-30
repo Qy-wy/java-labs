@@ -14,14 +14,27 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+
 
 @SuppressWarnings("serial")
 public class GraphicsDisplay extends JPanel {
+    private DecimalFormat formatter =
+            (DecimalFormat) NumberFormat.getInstance();
     // Список координат точек для построения графика
     private Double[][] graphicsData;
     // Флаговые переменные, задающие правила отображения графика
     private boolean showAxis = true;
     private boolean showMarkers = true;
+    private boolean showGrid = false;
+
+    public void setShowGrid(boolean showGrid) {
+        this.showGrid = showGrid;
+        repaint();
+    }
+
     // Границы диапазона пространства, подлежащего отображению
     private double minX;
     private double maxX;
@@ -51,6 +64,13 @@ public class GraphicsDisplay extends JPanel {
                 BasicStroke.JOIN_MITER, 10.0f, null, 0.0f);
 // Шрифт для подписей осей координат
         axisFont = new Font("Serif", Font.BOLD, 36);
+
+        formatter.setMaximumFractionDigits(5);
+        formatter.setMinimumFractionDigits(0);
+        formatter.setGroupingUsed(false);
+        DecimalFormatSymbols dfs = formatter.getDecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        formatter.setDecimalFormatSymbols(dfs);
     }
 
     // Данный метод вызывается из обработчика элемента меню "Открыть файл с графиком"
@@ -140,6 +160,8 @@ minY
 // Шаг 8 - В нужном порядке вызвать методы отображения элементов графика
 // Порядок вызова методов имеет значение, т.к. предыдущий рисунок будет затираться последующим
 // Первыми (если нужно) отрисовываются оси координат.
+// Сначала сетка (если нужна)
+        if (showGrid) paintGrid(canvas);
         if (showAxis) paintAxis(canvas);
 // Затем отображается сам график
         paintGraphics(canvas);
@@ -181,16 +203,84 @@ minY
         canvas.draw(graphics);
     }
 
+    // true, если в строковой записи числа цифры идут подряд по возрастанию
+// минус, точка и прочие символы игнорируются
+    private boolean digitsIncreasing(double value) {
+        String s = formatter.format(Math.abs(value));
+
+        Character prevDigit = null;
+
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (!Character.isDigit(c)) {
+                continue; // пропускаем нецифровые символы
+            }
+
+            if (prevDigit != null) {
+                // строгое возрастание: каждая следующая цифра больше предыдущей
+                if (c <= prevDigit) {
+                    return false;
+                }
+            }
+
+            prevDigit = c;
+        }
+
+        // хотя бы одна цифра должна быть
+        return prevDigit != null;
+    }
+
+    // Отображение координатной сетки
+    protected void paintGrid(Graphics2D canvas) {
+        // Сохраняем старые параметры
+        Stroke oldStroke = canvas.getStroke();
+        Color oldColor = canvas.getColor();
+
+        // Делаем тонкую светло-серую линию
+        canvas.setStroke(new BasicStroke(1.0f));
+        canvas.setColor(new Color(220, 220, 220)); // light gray
+
+        // Шаги по условию: 1/10 диапазона
+        double stepX = (maxX - minX) / 10.0;
+        double stepY = (maxY - minY) / 10.0;
+
+        // Вертикальные линии
+        for (double x = minX; x <= maxX + 1e-9; x += stepX) {
+            Point2D.Double p1 = xyToPoint(x, minY);
+            Point2D.Double p2 = xyToPoint(x, maxY);
+            canvas.draw(new Line2D.Double(p1, p2));
+        }
+
+        // Горизонтальные линии
+        for (double y = minY; y <= maxY + 1e-9; y += stepY) {
+            Point2D.Double p1 = xyToPoint(minX, y);
+            Point2D.Double p2 = xyToPoint(maxX, y);
+            canvas.draw(new Line2D.Double(p1, p2));
+        }
+
+        // Восстанавливаем параметры
+        canvas.setStroke(oldStroke);
+        canvas.setColor(oldColor);
+    }
+
     // Отображение маркеров точек, по которым рисовался график
     protected void paintMarkers(Graphics2D canvas) {
 // Шаг 1 - Установить специальное перо для черчения контуров маркеров
         canvas.setStroke(markerStroke);
-// Выбрать красный цвета для контуров маркеров
-        canvas.setColor(Color.RED);
-// Выбрать красный цвет для закрашивания маркеров внутри
-        canvas.setPaint(Color.RED);
 // Шаг 2 - Организовать цикл по всем точкам графика
         for (Double[] point : graphicsData) {
+            double x = point[0];
+            double y = point[1];
+
+            // Сначала выбираем цвет для КОНКРЕТНОЙ точки
+            if (digitsIncreasing(y)) {
+                canvas.setColor(Color.GREEN);  // точки, где цифры возрастают
+                canvas.setPaint(Color.GREEN);
+            } else {
+                canvas.setColor(Color.RED);    // остальные точки
+                canvas.setPaint(Color.RED);
+            }
+
             Point2D.Double center = xyToPoint(point[0], point[1]);
 
             double cx = center.getX();
